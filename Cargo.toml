@@ -1,0 +1,11 @@
+[package]
+name = "Quill"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clippy = "0.0.302"
+once_cell = "1.20.2"
+santiago = "1.3.1"
