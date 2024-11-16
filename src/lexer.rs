@@ -1,4 +1,3 @@
-use santiago::grammar;
 #[allow(unused_imports)]
 use santiago::{grammar::*, lexer::*};
 
