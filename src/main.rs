@@ -2,12 +2,16 @@
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 use std::{env, fs, process};
+use std::path::Path;
 
 mod flags;
 use crate::flags::*;
 
 mod lexer;
 use crate::lexer::*;
+
+mod grammar;
+use crate::grammar::*;
 
 // Thread-safe static FLAGS using `once_cell`
 static FLAGS: Lazy<Vec<Mutex<Flag>>> = Lazy::new(|| {
@@ -22,6 +26,12 @@ static FLAGS: Lazy<Vec<Mutex<Flag>>> = Lazy::new(|| {
             "COMPILE",
             "Compiles the program",
             &["--compile", "-c"],
+            false,
+        )),
+        Mutex::new(Flag::new(
+            "TEST",
+            "For testing all the files in the ./test directory | Developer use only",
+            &["--test", "-t"],
             false,
         )),
         Mutex::new(Flag::new(
@@ -50,7 +60,9 @@ fn usage(path: &str, err: Option<&str>) {
     }
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
+
+
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 3 {
@@ -95,7 +107,6 @@ fn main() {
         .for_each(|flag| match flag.name {
             "HELP" => {
                 usage(args.first().unwrap(), None);
-                process::exit(0);
             }
             "DEBUG" => {
                 println!("-------------------------------");
@@ -103,11 +114,6 @@ fn main() {
                 println!("-------------------------------");
                 match &lexer {
                     Ok(lexemes) => {
-                        println!("Lexemes:");
-                        for lexeme in lexemes {
-                            println!("    {lexeme}");
-                        }
-
                         match santiago::parser::parse(&grammar, &lexemes) {
                             Ok(parse_trees) => {
                                 println!("Parse Trees:");
@@ -128,8 +134,43 @@ fn main() {
                 }
             }
             "COMPILE" => {
-                println!("Compile flag is set. Starting compilation...");
+                todo!("Impliment Compile")
             }
-            _ => println!("Unknown flag: {}", flag.name),
+            "TEST" => {
+                let test_dir = Path::new("./tests");
+
+                for entry in fs::read_dir(test_dir).unwrap() {
+                    let entry = entry.unwrap();
+                    let file_path = entry.path();
+
+                    if entry.file_type().unwrap().is_file() {
+
+                        println!("File: {}", file_path.display());
+                        match &lexer {
+                            Ok(lexemes) => {
+                                match santiago::parser::parse(&grammar, &lexemes) {
+                                    Ok(parse_trees) => {
+                                        println!("Parse Trees:");
+                                        for ast in parse_trees {
+                                            println!("{ast}");
+                                        }
+                                    }
+                                    Err(error) => {
+                                        println!("Parsing Error:");
+                                        println!("{error}");
+                                    }
+                                }
+                            }
+                            Err(error) => {
+                                println!("Parsing Error:");
+                                println!("{error}");
+                            }
+                        }
+                    }
+                }
+            }
+            _ => println!("Unimplimented flag: {}", flag.name),
         });
+    
+    Ok(())
 }

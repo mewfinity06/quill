@@ -1,11 +1,21 @@
 use std::fmt::Debug;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Flag<'a> {
     pub name: &'a str,
     pub desc: &'a str,
     pub args: &'a [&'a str],
     pub default: bool,
+}
+
+impl<'a> Debug for Flag<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result<> {
+        write!(f, "{}\t", self.name,)?;
+        for arg in self.args {
+            write!(f, " {}", arg)?;
+        }
+        write!(f, "\t{}", self.desc)
+    }
 }
 
 #[allow(dead_code)]

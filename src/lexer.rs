@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use santiago::{grammar::*, lexer::*};
+use santiago::lexer::*;
 
 #[allow(dead_code)]
 pub fn lexer_rules() -> LexerRules {
@@ -31,6 +31,7 @@ pub fn lexer_rules() -> LexerRules {
         "DEFAULT" | "KEYWORD_FUNC" = string "func";
         "DEFAULT" | "KEYWORD_PRIVATE" = string "private";
         "DEFAULT" | "KEYWORD_PUBLIC" = string "public";
+        "DEFAULT" | "KEYWORD_STATIC" = string "static";
         "DEFAULT" | "KEYWORD_STRUCT" = string "struct";
         "DEFAULT" | "KEYWORD_SWITCH" = string "switch";
         "DEFAULT" | "KEYWORD_RETURN" = string "return";
@@ -45,11 +46,15 @@ pub fn lexer_rules() -> LexerRules {
         "DEFAULT" | "KEYWORD_CONTINUE" = string "continue";
         "DEFAULT" | "KEYWORD_FOR" = string "for";
         "DEFAULT" | "KEYWORD_WHILE" = string "while";
+        "DEFAULT" | "KEYWORD_LOOP" = string "loop";
         "DEFAULT" | "KEYWORD_SIGNED" = string "signed";
         "DEFAULT" | "KEYWORD_UNSIGNED" = string "unsigned";
         "DEFAULT" | "KEYWORD_USE" = string "use";
         "DEFAULT" | "KEYWORD_AS" = string "as";
-
+        "DEFAULT" | "KEYWORD_IN" = string "in";
+        "DEFAULT" | "KEYWORD_TYPESET" = string "typeset";
+        "DEFAULT" | "KEYWORD_MODULE" = string "module";
+ 
         // Identifier pattern
         "DEFAULT" | "IDENT" = pattern r"[a-zA-Z_][a-zA-Z0-9_]*";
 
@@ -109,6 +114,7 @@ pub fn lexer_rules() -> LexerRules {
         "DEFAULT" | "MINUS" = string "-";
         "DEFAULT" | "STAR" = string "*";
         "DEFAULT" | "SLASH" = string "/";
+        "DEFAULT" | "MOD" = string "%";
         "DEFAULT" | "PLUS_PLUS" = string "++";
         "DEFAULT" | "MINUS_MINUS" = string "--";
         "DEFAULT" | "STAR_STAR" = string "**";
@@ -127,139 +133,10 @@ pub fn lexer_rules() -> LexerRules {
         "DEFAULT" | "FULL_STOP" = string ".";
         "DEFAULT" | "BACK_TICK" = string "`";
         "DEFAULT" | "BACK_SLASH" = string "\\";
+        "DEFAULT" | "DOUBLE_COLON" = string "::";
 
         // Whitespace (skip)
         "DEFAULT" | "WS" = pattern r"\s+" => |lexer| lexer.skip();
         "DEFAULT" | "COMMENT" = pattern r"//[^\n]*|/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => |lexer| lexer.skip();
     )
-}
-
-#[allow(dead_code)]
-pub fn grammar() -> Grammar<()> {
-    santiago::grammar!(
-            "ID" => lexemes "IDENT";
-            "INT" => lexemes "INT";
-            "FLOAT" => lexemes "FLOAT";
-            "STRING" => lexemes "STRING";
-
-            // Keywords & Types
-            "type" => lexemes "TYPE_INT";
-            "type" => lexemes "TYPE_FLOAT";
-            "type" => lexemes "TYPE_CHAR";
-            "type" => lexemes "TYPE_STRING";
-            "type" => lexemes "TYPE_BYTE";
-            "type" => lexemes "TYPE_BOOL";
-            "type" => lexemes "TYPE_VOID";
-            "type" => lexemes "TYPE_NONE";
-            "type" => lexemes "TYPE_STRUCT_ENUM";
-            "type" => lexemes "TYPE_STRUCT_COMPACT";
-            "type" => lexemes "TYPE_STRUCT_LOOSE";
-            "type" => lexemes "TYPE_STRUCT_UNION";
-            "type" => lexemes "TYPE_VECTOR";
-            "type" => lexemes "TYPE_MATRIX";
-            "type" => lexemes "TYPE_ERROR";
-            "type" => lexemes "TYPE_COMPLEX";
-            "type" => lexemes "TYPE_USIZE";
-            "type" => lexemes "TYPE_ISIZE";
-            "func" => lexemes "KEYWORD_FUNC";
-            "private" => lexemes "KEYWORD_PRIVATE";
-            "public" => lexemes "KEYWORD_PUBLIC";
-            "struct" => lexemes "KEYWORD_STRUCT";
-            "switch" => lexemes "KEYWORD_SWITCH";
-            "return" => lexemes "KEYWORD_RETURN";
-            "if" => lexemes "KEYWORD_IF";
-            "else" => lexemes "KEYWORD_ELSE";
-            "finally" => lexemes "KEYWORD_FINALLY";
-            "impl" => lexemes "KEYWORD_IMPL";
-            "const" => lexemes "KEYWORD_CONST";
-            "mut" => lexemes "KEYWORD_MUT";
-            "defer" => lexemes "KEYWORD_DEFER";
-            "break" => lexemes "KEYWORD_BREAK";
-            "continue" => lexemes "KEYWORD_CONTINUE";
-            "for" => lexemes "KEYWORD_FOR";
-            "while" => lexemes "KEYWORD_WHILE";
-            "signed" => lexemes "KEYWORD_SIGNED";
-            "unsigned" => lexemes "KEYWORD_UNSIGNED";
-            "use" => lexemes "KEYWORD_USE";
-            "as" => lexemes "KEYWORD_AS";
-
-            // Assignment operators
-            ":" => lexemes "COLON";
-            "=" => lexemes "ASSIGNMENT";
-            ":=" => lexemes "ASSIGNMENT_IMPLICIT";
-            "+=" => lexemes "ASSIGNMENT_PLUS";
-            "-=" => lexemes "ASSIGNMENT_MINUS";
-            "*=" => lexemes "ASSIGNMENT_STAR";
-            "/=" => lexemes "ASSIGNMENT_DIVIDE";
-            "%=" => lexemes "ASSIGNMENT_MOD";
-            "|=" => lexemes "ASSIGNMENT_BITWISE_OR";
-            "&=" => lexemes "ASSIGNMENT_BITWISE_AND";
-            "~=" => lexemes "ASSIGNMENT_BITWISE_XOR";
-            "&~=" => lexemes "ASSIGNMENT_AND_NOT";
-            "<<=" => lexemes "ASSIGNMENT_SHIFT_LEFT";
-            ">>=" => lexemes "ASSIGNMENT_SHIFT_RIGHT";
-            "||=" => lexemes "ASSIGNMENT_CONDITIONAL_OR";
-            "&&=" => lexemes "ASSIGNMENT_CONDITIONAL_AND";
-
-            // Separator tokens
-            "(" => lexemes "OPEN_PAREN";
-            ")" => lexemes "CLOSE_PAREN";
-            "[" => lexemes "OPEN_BRACKET";
-            "]" => lexemes "CLOSE_BRACKET";
-            "{" => lexemes "OPEN_CURLY";
-            "}" => lexemes "CLOSE_CURLY";
-            ";" => lexemes "SEMICOLON";
-            "," => lexemes "COMMA";
-
-            // Range tokens
-            "..<" => lexemes "TO_LESS";
-            "..=" => lexemes "TO_EQUAL";
-
-            // Comparison tokens
-            "==" => lexemes "EQUALS";
-            "!=" => lexemes "NOT_EQUALS";
-            ">=" => lexemes "GREATER_EQUALS";
-            "<=" => lexemes "LESSER_EQUALS";
-            "<" => lexemes "LEFT_ARROW";
-            ">" => lexemes "RIGHT_ARROW";
-
-            // Logical operators
-            "&&" => lexemes "AND";
-            "||" => lexemes "OR";
-            "!" => lexemes "BANG";
-            "|" => lexemes "PIPE";
-            "~" => lexemes "TILDE";
-            "&" => lexemes "BITWISE_AND";
-
-            // Mathematical tokens
-            "+" => lexemes "PLUS";
-            "-" => lexemes "MINUS";
-            "*" => lexemes "STAR";
-            "/" => lexemes "SLASH";
-            "++" => lexemes "PLUS_PLUS";
-            "--" => lexemes "MINUS_MINUS";
-            "**" => lexemes "STAR_STAR";
-
-            // Arrow tokens
-            "=>" => lexemes "FAT_ARROW";
-            "->" => lexemes "THIN_ARROW";
-            "|>" => lexemes "PIPE_LINE";
-
-            // Misc
-            "@" => lexemes "AT";
-            "#" => lexemes "POUND";
-            "$" => lexemes "DOLLAR";
-            "^" => lexemes "CARROT";
-            "?" => lexemes "QUESTION";
-            "." => lexemes "FULL_STOP";
-            "`" => lexemes "BACK_TICK";
-            "\\" => lexemes "BACK_SLASH";
-
-            // Associativity
-            Associativity::Left => rules "+" "-";
-            Associativity::Left => rules "*" "/";
-            Associativity::Right => rules "=";
-            Associativity::None => rules "==" "!=";
-            Associativity::Right => rules "&&" "||";
-        )
 }
